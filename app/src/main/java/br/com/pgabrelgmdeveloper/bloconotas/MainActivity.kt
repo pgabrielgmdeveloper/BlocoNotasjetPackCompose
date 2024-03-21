@@ -2,6 +2,7 @@ package br.com.pgabrelgmdeveloper.bloconotas
 
 import android.graphics.drawable.VectorDrawable
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,21 +22,26 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import br.com.pgabrelgmdeveloper.bloconotas.datastore.StoreAnnotation
 import br.com.pgabrelgmdeveloper.bloconotas.ui.theme.BlocoNotasTheme
 import br.com.pgabrelgmdeveloper.bloconotas.ui.theme.GOLD
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,9 +57,14 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BlocoDeNotas() {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val storeAnnotation = StoreAnnotation(context)
+    val annotation = storeAnnotation.getAnnotation.collectAsState(initial = "")
     var notas by remember {
         mutableStateOf("")
     }
+    notas = annotation.value
     Scaffold(
         topBar = {
         TopAppBar(
@@ -63,7 +74,12 @@ fun BlocoDeNotas() {
         containerColor = Color.White,
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { /*TODO*/ },
+                onClick = {
+                    scope.launch {
+                        storeAnnotation.saveAnnotations(notas)
+                        Toast.makeText(context, "As anotações foram salva com sucesso", Toast.LENGTH_LONG).show()
+                    }
+                },
                 containerColor = GOLD,
                 elevation =  FloatingActionButtonDefaults.elevation(8.dp),
                 
